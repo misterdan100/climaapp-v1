@@ -11,15 +11,59 @@ const ClimaProvider = ({ children }) => {
 
   const [resultado, setResultado] = useState({});
   const [cargando, setCargando] = useState(false);
+  const [alerta, setAlerta] = useState("");
   const [noResultado, setNoResultado] = useState("");
   const [countries, setCountries] = useState([]);
-  const [cities, setCities] = useState([])
+  const [cities, setCities] = useState([]);
 
   const datosBusqueda = (e) => {
-    setBusqueda({
-      ...busqueda,
-      [e.target.name]: e.target.value,
-    });
+    if (e.target.name === "pais") {
+      // si se esta buscando pais
+      const encontrado = countries.findIndex(
+        (country) => country.name.toLowerCase() === e.target.value.toLowerCase()
+      );
+
+      if (encontrado !== -1) {
+        // pais encontrado
+        setBusqueda({
+          ...busqueda,
+          pais: countries[encontrado].iso2,
+        });
+        getCities(countries[encontrado].iso2);
+      } else {
+        // Pais no encotrado
+        setBusqueda({
+          ciudad: "",
+          pais: "",
+        });
+
+        setCities([]);
+      }
+    } else {
+      // si se esta buscando ciudad
+      const ciudadEncontrada = cities.findIndex(
+        (ciudad) =>
+          ciudad.name
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") === e.target.value.toLowerCase()
+      );
+
+      if (ciudadEncontrada !== -1) {
+        setBusqueda({
+          ...busqueda,
+          ciudad: e.target.value,
+        });
+
+        setAlerta("");
+      } else {
+        setBusqueda({
+          ...busqueda,
+          ciudad: "",
+        });
+        // setAlerta('Ciudad no encontrada')
+      }
+    }
   };
 
   const consultarClima = async (datos) => {
@@ -29,7 +73,6 @@ const ClimaProvider = ({ children }) => {
       const { ciudad, pais } = datos;
 
       const appId = import.meta.env.VITE_API_KEY;
-
       const url = `http://api.openweathermap.org/geo/1.0/direct?q=${ciudad},${pais}&limit=1&appid=${appId}`;
 
       const { data } = await axios(url);
@@ -46,54 +89,48 @@ const ClimaProvider = ({ children }) => {
     }
   };
 
-  const getCities = async country => {
-
-
-    const ApiUrlCities = `https://api.countrystatecity.in/v1/countries/${country}/cities`
+  const getCities = async (country) => {
+    const ApiUrlCities = `https://api.countrystatecity.in/v1/countries/${country}/cities`;
     const options = {
       headers: {
-        'X-CSCAPI-KEY': import.meta.env.VITE_COUNTRY_API
-      }
-    }
+        "X-CSCAPI-KEY": import.meta.env.VITE_COUNTRY_API,
+      },
+    };
 
-    if(country === '') return
+    if (country === "") return;
 
     try {
-      const responseCities = await axios(ApiUrlCities, options)
-
-      setCities(responseCities.data)
-    } catch(error) {
-      console.log('DAN Error', error)
+      const responseCities = await axios(ApiUrlCities, options);
+      setCities(responseCities.data);
+    } catch (error) {
+      console.error(error);
     }
-  }
+  };
 
   useEffect(() => {
-    getCities(busqueda.pais)
-  }, [busqueda])
-
+    getCities(busqueda.pais);
+  }, []);
 
   //! country states cities api----------------
   const getApiInfo = async () => {
+    const ApiUrl = "https://api.countrystatecity.in/v1/countries";
 
-    const ApiUrl = 'https://api.countrystatecity.in/v1/countries'
-    
     const options = {
       headers: {
-        'X-CSCAPI-KEY': import.meta.env.VITE_COUNTRY_API
-      }
-    }
+        "X-CSCAPI-KEY": import.meta.env.VITE_COUNTRY_API,
+      },
+    };
     try {
-      const response = await axios(ApiUrl, options)
-      setCountries(response.data)
-    } catch(error) {
-      console.log('DAN Error', error)
+      const response = await axios(ApiUrl, options);
+      setCountries(response.data);
+    } catch (error) {
+      console.error(error);
     }
-
-  }
+  };
 
   useEffect(() => {
-    getApiInfo()
-  }, [])
+    getApiInfo();
+  }, []);
 
   return (
     <ClimaContext.Provider
@@ -107,7 +144,9 @@ const ClimaProvider = ({ children }) => {
         setCargando,
         noResultado,
         countries,
-        cities
+        cities,
+        alerta,
+        setAlerta,
       }}
     >
       {children}

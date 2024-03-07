@@ -1,22 +1,26 @@
-import { useState } from "react";
 import useClima from "../hooks/useClima";
 
 const Formulario = () => {
-  const [alerta, setAlerta] = useState("");
-  const { busqueda, datosBusqueda, consultarClima, countries, cities } =
-    useClima();
+  const {
+    busqueda,
+    datosBusqueda,
+    consultarClima,
+    countries,
+    cities,
+    alerta,
+    setAlerta,
+  } = useClima();
   const { ciudad, pais } = busqueda;
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (Object.values(busqueda).includes("")) {
-      setAlerta("Todos los campos son obligatorios");
+      setAlerta("Verifique que los datos sean correctos");
       return;
     }
 
     consultarClima(busqueda);
-
     setAlerta("");
   };
 
@@ -26,26 +30,45 @@ const Formulario = () => {
       <form onSubmit={handleSubmit}>
         <div className="campo">
           <label htmlFor="pais">Pais</label>
-          <select name="pais" id="pais" onChange={datosBusqueda} value={pais}>
-            <option value="">Seleccione un pais</option>
+          <input
+            type="text"
+            list="pais"
+            name="pais"
+            placeholder="Seleccione un pais"
+            onChange={datosBusqueda}
+          />
+          <datalist
+            name="pais"
+            id="pais"
+            value={pais}
+          >
             {countries?.map((country) => (
-              <option key={country.iso2} value={country.iso2}>
+              <option
+                key={country.iso2}
+                name={country.iso2}
+                value={country.name}
+              >
                 {country.name}
               </option>
             ))}
-          </select>
+          </datalist>
         </div>
 
         <div className="campo">
           <label htmlFor="ciudad">Ciudad</label>
-          <select name="ciudad" id="ciudad" onChange={datosBusqueda} value={ciudad}>
-            <option value="">Seleccione una ciudad</option>
+          <input
+            type="text"
+            placeholder="Seleccione una ciudad"
+            list="ciudad"
+            onChange={datosBusqueda}
+          />
+          <datalist name="ciudad" id="ciudad" value={ciudad}>
             {cities?.map((city) => (
               <option key={city.id} value={city.name}>
                 {city.name}
               </option>
             ))}
-          </select>
+          </datalist>
         </div>
 
         <input type="submit" value="Consultar Clima" />
