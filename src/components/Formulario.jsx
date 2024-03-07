@@ -20,8 +20,6 @@ const Formulario = () => {
     setAlerta("");
   };
 
-  console.log(cities)
-
   return (
     <div className="contenedor">
       {alerta && <p>{alerta}</p>}
@@ -32,7 +30,7 @@ const Formulario = () => {
             <option value="">Seleccione un pais</option>
             {countries?.map((country) => (
               <option key={country.iso2} value={country.iso2}>
-                {country.country}
+                {country.name}
               </option>
             ))}
           </select>
@@ -40,19 +38,11 @@ const Formulario = () => {
 
         <div className="campo">
           <label htmlFor="ciudad">Ciudad</label>
-          {/* <input
-            type="text"
-            id="ciudad"
-            name="ciudad"
-            onChange={datosBusqueda}
-            value={ciudad}
-          /> */}
-
           <select name="ciudad" id="ciudad" onChange={datosBusqueda} value={ciudad}>
             <option value="">Seleccione una ciudad</option>
             {cities?.map((city) => (
-              <option key={city} value={city}>
-                {city}
+              <option key={city.id} value={city.name}>
+                {city.name}
               </option>
             ))}
           </select>

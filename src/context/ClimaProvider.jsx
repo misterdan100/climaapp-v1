@@ -20,7 +20,6 @@ const ClimaProvider = ({ children }) => {
       ...busqueda,
       [e.target.name]: e.target.value,
     });
-    console.log(busqueda)
   };
 
   const consultarClima = async (datos) => {
@@ -47,33 +46,54 @@ const ClimaProvider = ({ children }) => {
     }
   };
 
-  const getCountries = async () => {
-    const url = "https://countriesnow.space/api/v0.1/countries";
+  const getCities = async country => {
+
+
+    const ApiUrlCities = `https://api.countrystatecity.in/v1/countries/${country}/cities`
+    const options = {
+      headers: {
+        'X-CSCAPI-KEY': import.meta.env.VITE_COUNTRY_API
+      }
+    }
+
+    if(country === '') return
 
     try {
-      const response = await axios(url);
-      // console.log(response.data.data)
-      setCountries(response.data.data);
-    } catch (error) {
-      console.log("Error en getCountries........", error);
+      const responseCities = await axios(ApiUrlCities, options)
+
+      setCities(responseCities.data)
+    } catch(error) {
+      console.log('DAN Error', error)
     }
-  };
-
-  useEffect(() => {
-    getCountries();
-  }, []);
-
-  const getCities = async country => {
-    const citiesArray = countries.filter(actual => actual.iso2 === country)
-    setCities(citiesArray[0].cities)
-    // console.log('cities >>>>>>>>>>>', country)
-    console.log('cities >>>>>>>>>>>', citiesArray[0].cities)
   }
 
   useEffect(() => {
-    console.log('buscando ......', busqueda.pais)
     getCities(busqueda.pais)
   }, [busqueda])
+
+
+  //! country states cities api----------------
+  const getApiInfo = async () => {
+
+    const ApiUrl = 'https://api.countrystatecity.in/v1/countries'
+    
+    const options = {
+      headers: {
+        'X-CSCAPI-KEY': import.meta.env.VITE_COUNTRY_API
+      }
+    }
+    try {
+      const response = await axios(ApiUrl, options)
+      setCountries(response.data)
+    } catch(error) {
+      console.log('DAN Error', error)
+    }
+
+  }
+
+  useEffect(() => {
+    getApiInfo()
+  }, [])
 
   return (
     <ClimaContext.Provider
